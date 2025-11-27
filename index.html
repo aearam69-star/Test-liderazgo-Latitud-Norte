@@ -1,439 +1,473 @@
-<!DOCTYPE html>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Test de Arquetipos de Liderazgo — Escolar</title>
+<title>Test de Arquetipos de Liderazgo — Escolar (Versión Definitiva)</title>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- jsPDF para descarga PDF -->
+<!-- html2canvas + jsPDF para generar PDF -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
+  /* ---------- PÁRAMO: paleta limpia, acento verde/amarillo/terroso ---------- */
   :root{
-    --bg: #f5f7f6;
+    --bg: #f6f8f7;
     --card: #ffffff;
     --muted: #6b7280;
-    --buho: #6bbf9a;      /* verde suave - Búho */
-    --frailejon: #d9bf57; /* amarillo - Frailejón */
-    --oso: #d46b4a;       /* tierra/ocre - Oso */
-    --condor: #4a6fbf;    /* azul - Cóndor */
+    --accent: #8aa68a; /* verde páramo */
+    --fraile: #d9bf57; /* amarillo frailejón */
+    --oso: #8b6a4a; /* marrón terroso */
+    --condor: #4a6fb1; /* azul cóndor */
     --line: #e7e9eb;
     --text: #0f172a;
+    --glass: rgba(255,255,255,0.85);
   }
-  html,body { height:100%; margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background: var(--bg); color:var(--text); }
-  .wrap { max-width: 980px; margin:28px auto; background:var(--card); border-radius:12px; padding:22px; box-shadow:0 8px 28px rgba(15,23,42,0.06); border:1px solid var(--line); }
-  header { display:flex; gap:14px; align-items:center; }
-  .logo { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:700; color:white; background:linear-gradient(180deg,var(--frailejon),#cfae3f); box-shadow: 0 6px 18px rgba(209,175,74,0.12); }
-  h1 { margin:0; font-size:20px; }
-  p.lead { margin:6px 0 14px; color:var(--muted); line-height:1.4 }
-  .progress { height:12px; background:#f0f4f3; border-radius:999px; overflow:hidden; margin:14px 0; border:1px solid var(--line);}
-  .progress > i { display:block; height:100%; width:0%; transition:width .28s ease; background: linear-gradient(90deg,var(--buho),var(--condor)); }
-  #quiz { margin-top:8px; }
-  .page { display:none; }
-  .page.active { display:block; }
-  .question { border-radius:10px; padding:12px; margin-bottom:12px; background:#fff; border:1px solid var(--line); box-shadow:0 2px 8px rgba(10,10,12,0.02); }
-  .question h4 { margin:0 0 8px; font-size:15px; }
-  .opts { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
-  label.opt { display:flex; gap:12px; align-items:flex-start; padding:10px; border-radius:8px; background:#fbfdff; border:1px solid #f0f3f7; cursor:pointer; transition: box-shadow .12s, transform .06s; }
-  label.opt:hover { box-shadow:0 8px 20px rgba(15,23,42,0.06); transform:translateY(-2px); }
-  input[type="radio"] { margin-top:4px; }
-  .nav { display:flex; justify-content:space-between; gap:12px; align-items:center; margin-top:16px; }
-  .nav .info { color:var(--muted); font-size:14px; }
-  button.primary { background:var(--condor); color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-weight:700; box-shadow:0 8px 20px rgba(74,111,191,0.12); }
-  button.secondary { background:#fff; color:var(--text); border:1px solid var(--line); padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; }
-  .result { display:none; margin-top:16px; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-  .card { background:#fbfdff; padding:14px; border-radius:10px; border:1px solid var(--line); }
-  .dominant { margin-top:14px; padding:14px; border-radius:10px; border:1px solid var(--line); background:linear-gradient(180deg,#fff, #fbfdff); }
-  .actions { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
-  footer.small { color:var(--muted); font-size:13px; margin-top:12px; display:block; }
-  @media(max-width:720px){ .grid2{grid-template-columns:1fr} header{flex-direction:row;gap:10px} }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;padding:0;background:linear-gradient(180deg,#fbfdfc 0%, #f6f8f7 100%)}
+  body{
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:var(--text);
+    padding:28px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  .wrap{
+    max-width:1000px;margin:0 auto;background:var(--card);border-radius:16px;padding:26px;border:1px solid var(--line);
+    box-shadow:0 12px 40px rgba(15,23,42,0.06);
+  }
+
+  header{display:flex;gap:18px;align-items:center}
+  .logo{
+    width:74px;height:74px;border-radius:14px;background:linear-gradient(180deg,var(--accent),#b7d4b2);
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:20px;
+    box-shadow:0 6px 18px rgba(138,166,138,0.14);
+  }
+  h1{margin:0;font-size:22px;line-height:1.05}
+  p.lead{margin:6px 0 18px;color:var(--muted);line-height:1.45}
+  .meta{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+
+  .progress{height:14px;background:#f2f6f2;border-radius:999px;overflow:hidden;margin:18px 0;border:1px solid var(--line)}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#cfe6cf);width:0%;transition:width .25s ease}
+
+  #quiz{margin-top:8px}
+  .page{display:none}
+  .page.active{display:block}
+
+  .question{
+    border:1px solid var(--line);background:linear-gradient(180deg,#ffffff,#fbfefb);border-radius:12px;padding:14px;margin-bottom:14px;
+    box-shadow:0 6px 20px rgba(12,18,12,0.02);
+  }
+  .question h4{margin:0 0 10px;font-size:15.5px}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+
+  /* option styling */
+  label.opt{
+    display:flex;gap:14px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--glass);border:1px solid #f1f4f1;cursor:pointer;
+    transition:transform .12s, box-shadow .12s, border-color .12s;user-select:none;
+  }
+  label.opt:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(12,22,14,0.05)}
+  label.opt input[type="radio"]{margin-top:3px;transform:scale(1.1)}
+  label.opt .pill{
+    min-width:38px;padding:8px;border-radius:8px;color:#fff;font-weight:800;text-align:center;
+    font-size:13px;line-height:1;
+  }
+  .pill.buho{background:var(--accent)}
+  .pill.fraile{background:var(--fraile)}
+  .pill.oso{background:var(--oso)}
+  .pill.condor{background:var(--condor)}
+
+  /* selected visual */
+  label.opt.selected{
+    border-color:rgba(0,0,0,0.06);
+    box-shadow:0 10px 28px rgba(0,0,0,0.06);
+    transform:translateY(-2px);
+    background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,255,250,0.95));
+  }
+
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+  .nav .info{color:var(--muted);font-size:14px}
+  .controls{display:flex;gap:10px}
+
+  button.primary{
+    background:linear-gradient(180deg,var(--accent),#699a6a);color:#083012;border:none;padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:800;
+    box-shadow:0 12px 30px rgba(86,129,86,0.12);font-size:15px;
+  }
+  button.ghost{
+    background:#fff;color:var(--text);border:1px solid var(--line);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:700;
+  }
+  button.ghost[disabled]{opacity:.5;cursor:not-allowed}
+
+  #result{display:none;margin-top:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .profileCard{background:linear-gradient(180deg,#ffffff,#fbfefb);border-radius:12px;padding:16px;border:1px solid var(--line)}
+  .dominantTitle{font-family:"Georgia","Times New Roman",serif;font-size:36px;color:var(--text);margin:4px 0}
+  .dominantSubtitle{font-size:14px;color:var(--muted);margin-bottom:8px}
+  .dominantBadge{display:inline-block;padding:10px 14px;border-radius:999px;font-weight:900;color:#fff}
+  .small{font-size:13px;color:var(--muted)}
+  footer.small{margin-top:16px;color:var(--muted);font-size:13px}
+
+  /* responsive */
+  @media(max-width:900px){
+    .grid2{grid-template-columns:1fr}
+    .logo{width:58px;height:58px}
+    .dominantTitle{font-size:28px}
+  }
+
+  /* PDF-friendly hidden helper */
+  .printHidden{display:none}
 </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="wrap" id="appWrap">
     <header>
       <div class="logo">TN</div>
       <div>
         <h1>Test de Arquetipos de Liderazgo — Escolar</h1>
-        <p class="lead">Lee cada situación y elige la acción que <strong>realmente</strong> harías en tu colegio. Son 40 situaciones (10 por arquetipo). Las preguntas y las opciones aparecen en orden aleatorio para preservar honestidad.</p>
+        <p class="lead">Responde con la acción que **realmente** harías — no lo que suena mejor. Son 40 situaciones: 10 por arquetipo. Las preguntas aparecen en orden aleatorio (10 por página).</p>
+        <div class="meta"><span class="small">Diseño inspirado en los páramos — tonos verdes, terrosos y azules.</span></div>
       </div>
     </header>
 
     <div class="progress" aria-hidden="true"><i id="progressBar" style="width:0%"></i></div>
 
-    <div id="quiz"></div>
+    <div id="quiz" role="list"></div>
 
-    <div class="nav">
+    <div class="nav" aria-hidden="false">
       <div class="info" id="pageInfo">Página 1 / 4 · Respondidas 0 / 40</div>
-      <div>
-        <button id="prevBtn" class="secondary" onclick="prevPage()" disabled>Anterior</button>
+      <div class="controls">
+        <button id="prevBtn" class="ghost" onclick="prevPage()" disabled>Anterior</button>
         <button id="nextBtn" class="primary" onclick="nextPage()">Siguiente</button>
       </div>
     </div>
 
-    <div id="resultBlock" class="result"></div>
+    <div id="result" aria-live="polite"></div>
 
-    <footer class="small">Sustento: ideas basadas en Greenleaf (servant leadership), Goleman (inteligencia emocional), y teorías de liderazgo situacional y orientado a resultados.</footer>
+    <footer class="small">Sustento: Greenleaf, Goleman y teorías contemporáneas sobre liderazgo situacional y emocional — adaptado para contexto escolar.</footer>
   </div>
 
 <script>
-/* ===========================
-   Preguntas (40 situacionales)
-   10 por arquetipo: buho, frailejon, oso, condor
-   Cada opción asigna 1 punto al arquetipo correspondiente.
-   Diseñadas para contexto escolar (estrato alto Bogotá).
-   =========================== */
-
+/* =========================
+   PREGUNTAS (40) — objetos (tal como diste)
+   A = Búho (buho), B = Frailejón (frailejon), C = Oso (oso), D = Cóndor (condor)
+   ========================= */
 const QUESTIONS = [
-/* BÚHO (1-10) */
-{ q: "Durante el ensayo de una obra, ves a un compañero que se queda fuera del grupo y parece triste. ¿Qué haces?",
-  opts: [
-    { t: "Me acerco y le pregunto si quiere hablar; lo escucho con calma.", v:"buho" },
-    { t: "Le ofrezco ayudarle con su parte técnica si lo necesita.", v:"frailejon" },
-    { t: "Lo invito a participar en un ejercicio práctico para distraerlo.", v:"oso" },
-    { t: "Le explico el cronograma para que entienda su rol y se sienta seguro.", v:"condor" }
-  ]},
-{ q: "Un estudiante nuevo tiene dificultades para ubicarse en el colegio. ¿Qué haces?",
-  opts: [
-    { t: "Lo invito a caminar conmigo y le presento a otros.", v:"buho" },
-    { t: "Le muestro dónde están los salones y lo ayudo con lo que necesite.", v:"frailejon" },
-    { t: "Le propongo un juego para que conozca gente rápido.", v:"oso" },
-    { t: "Le doy una guía organizada de sus horarios y actividades.", v:"condor" }
-  ]},
-{ q: "En una tutoría, notas que una compañera está a punto de quebrarse emocionalmente. ¿Qué haces?",
-  opts: [
-    { t: "Le ofrezco mi tiempo para escucharla y entender qué la afecta.", v:"buho" },
-    { t: "Le pregunto si quiere que la acompañe con tareas pendientes para que respire.", v:"frailejon" },
-    { t: "Le sugiero salir a caminar para despejarse y retomar luego.", v:"oso" },
-    { t: "Le ayudo a organizar un plan de recuperación académico paso a paso.", v:"condor" }
-  ]},
-{ q: "Durante una dinámica, alguien hace un comentario que hiere a otro. ¿Qué haces?",
-  opts: [
-    { t: "Me acerco a la persona afectada y le pregunto cómo está.", v:"buho" },
-    { t: "Le ofrezco apoyo ayudándole con su parte del trabajo.", v:"frailejon" },
-    { t: "Intervengo diciendo que eso no está bien y marco un límite.", v:"oso" },
-    { t: "Propongo una breve estructura de reparación (quién, cómo, cuándo).", v:"condor" }
-  ]},
-{ q: "Un compañero constante está fallando por problemas personales. ¿Qué haces?",
-  opts: [
-    { t: "Lo busco para escuchar y ofrecer contención.", v:"buho" },
-    { t: "Me ofrezco a cubrir parte de su trabajo temporalmente.", v:"frailejon" },
-    { t: "Coordino una tarea práctica para que vuelva a sentirse capaz.", v:"oso" },
-    { t: "Le propongo un plan con pasos y fechas para retomar ritmo.", v:"condor" }
-  ]},
-{ q: "Hay tensión previa a la presentación final y algunos lloran de nervios. ¿Qué haces?",
-  opts: [
-    { t: "Hablo con calma con quienes lo necesitan y los escucho.", v:"buho" },
-    { t: "Reasigno pequeñas tareas para alivianar la carga de los más nerviosos.", v:"frailejon" },
-    { t: "Propongo un calentamiento grupal para liberar nervios.", v:"oso" },
-    { t: "Repaso el cronograma y el orden para dar seguridad.", v:"condor" }
-  ]},
-{ q: "Un compañero se siente excluido de las decisiones del grupo. ¿Qué haces?",
-  opts: [
-    { t: "Le pregunto qué le gustaría aportar y lo incluyo.", v:"buho" },
-    { t: "Le doy un rol concreto de apoyo en la próxima actividad.", v:"frailejon" },
-    { t: "Hago una dinámica para que todos participen activamente.", v:"oso" },
-    { t: "Propongo reglas claras de participación y turnos.", v:"condor" }
-  ]},
-{ q: "En el comedor escolar alguien comenta un problema familiar a solas. ¿Qué haces?",
-  opts: [
-    { t: "Me siento y escucho, respetando su privacidad.", v:"buho" },
-    { t: "Le ofrezco ayuda práctica (apuntes, repasos) para que no pierda el ritmo.", v:"frailejon" },
-    { t: "Le propongo distraerse con una actividad deportiva suave.", v:"oso" },
-    { t: "Le sugiero personas o recursos (psicólogo/orientador) según lo necesite.", v:"condor" }
-  ]},
-{ q: "Detectas que en tu equipo hay malestar no expresado. ¿Qué haces?",
-  opts: [
-    { t: "Convoco a una pequeña conversación para que cada quien comparta cómo se siente.", v:"buho" },
-    { t: "Ofrezco mi ayuda para resolver tareas pendientes y bajar la presión.", v:"frailejon" },
-    { t: "Propongo una actividad que genere energía y cohesión.", v:"oso" },
-    { t: "Hago una lista con problemas y posibles soluciones para priorizar.", v:"condor" }
-  ]},
+/* 1 */ {q:"En una caminata de Latitud Norte, notas que un compañero está más callado de lo normal.",
+  opts:[ {t:"Me acerco y le pregunto cómo se siente.", v:"buho"},
+         {t:"Busco acompañarlo un rato para que no vaya solo.", v:"frailejon"},
+         {t:"Lo motivo con algún comentario positivo.", v:"oso"},
+         {t:"Le pregunto si necesita organizar mejor su paso o ritmo.", v:"condor"} ]},
+/* 2 */ {q:"Durante una práctica de deporte, alguien se frustra por un error.",
+  opts:[ {t:"Le digo que a todos nos pasa y lo apoyo.", v:"buho"},
+         {t:"Me acerco a ayudarle a mejorar el movimiento.", v:"frailejon"},
+         {t:"Le enseño cómo hacerlo con más energía.", v:"oso"},
+         {t:"Lo ayudo a identificar qué puede ajustar.", v:"condor"} ]},
+/* 3 */ {q:"En una reunión de equipo, alguien queda fuera de la conversación.",
+  opts:[ {t:"Le doy la palabra y lo incluyo con cuidado.", v:"buho"},
+         {t:"Propongo que escuchemos todas las ideas.", v:"frailejon"},
+         {t:"Hago una dinámica rápida para que todos participen.", v:"oso"},
+         {t:"Reorganizo cómo conversamos para evitar que se repita.", v:"condor"} ]},
+/* 4 */ {q:"Antes de un reto grupal, un compañero confiesa que tiene miedo.",
+  opts:[ {t:"Le cuento que es normal y lo valido.", v:"buho"},
+         {t:"Le ofrezco acompañarlo durante el reto.", v:"frailejon"},
+         {t:"Me ofrezco a hacerlo con él primero.", v:"oso"},
+         {t:"Le explico cómo funcionará la actividad paso a paso.", v:"condor"} ]},
+/* 5 */ {q:"En un descanso, ves a alguien sentado solo.",
+  opts:[ {t:"Me acerco a hacerle compañía.", v:"buho"},
+         {t:"Lo invito a unirse a un grupo.", v:"frailejon"},
+         {t:"Le propongo movernos o caminar un rato.", v:"oso"},
+         {t:"Le pregunto qué necesita y cómo integrarlo mejor.", v:"condor"} ]},
+/* 6 */ {q:"En una práctica artística, alguien dice que no le salió bien.",
+  opts:[ {t:"Le hablo con calma para que no se desanime.", v:"buho"},
+         {t:"Me ofrezco a repetirlo juntos.", v:"frailejon"},
+         {t:"Le muestro cómo hacerlo con más seguridad.", v:"oso"},
+         {t:"Le explico qué puede ajustar para mejorar.", v:"condor"} ]},
+/* 7 */ {q:"Un amigo te dice que está saturado con el colegio.",
+  opts:[ {t:"Lo escucho y le doy un espacio seguro.", v:"buho"},
+         {t:"Lo ayudo a organizar su agenda.", v:"frailejon"},
+         {t:"Lo saco a moverse para liberar tensión.", v:"oso"},
+         {t:"Le propongo métodos concretos para bajar carga.", v:"condor"} ]},
+/* 8 */ {q:"En un trabajo en grupo, alguien está de mal humor.",
+  opts:[ {t:"Pregunto si quiere hablar de lo que siente.", v:"buho"},
+         {t:"Le digo que yo puedo tomar una parte si está abrumado.", v:"frailejon"},
+         {t:"Propongo una pausa para bajar tensión.", v:"oso"},
+         {t:"Organizo las tareas para que sea más llevadero.", v:"condor"} ]},
+/* 9 */ {q:"Durante un juego cooperativo, un compañero se equivoca y se siente culpable.",
+  opts:[ {t:"Le recuerdo que es parte del proceso.", v:"buho"},
+         {t:"Le ofrezco apoyo para que siga intentando.", v:"frailejon"},
+         {t:"Lo animo a repetirlo con energía.", v:"oso"},
+         {t:"Le explico qué puede intentar distinto.", v:"condor"} ]},
+/*10 */ {q:"En una conversación de curso, alguien comparte algo sensible.",
+  opts:[ {t:"Cierro el espacio para que se sienta escuchado.", v:"buho"},
+         {t:"Le ofrezco mi ayuda si la necesita luego.", v:"frailejon"},
+         {t:"Cambio el tono de la actividad para hacerlo sentir más cómodo.", v:"oso"},
+         {t:"Recuerdo al grupo la importancia de manejar la información con cuidado.", v:"condor"} ]},
 
-/* FRAILEJÓN (11-20) */
-{ q: "Están preparando un evento y faltan manos para montar logística. ¿Qué haces?",
-  opts: [
-    { t: "Me ofrezco de voluntario para coordinar y ayudar.", v:"frailejon" },
-    { t: "Organizo un plan con tareas y tiempos para la logística.", v:"condor" },
-    { t: "Hago la parte más pesada para que el resto avance.", v:"oso" },
-    { t: "Reviso si algunos compañeros necesitan apoyo para hacerlo.", v:"buho" }
-  ]},
-{ q: "Un compañero olvidó su uniforme y no puede participar en práctica. ¿Qué haces?",
-  opts: [
-    { t: "Le presto lo que tenga o lo ayudo a resolver la situación.", v:"frailejon" },
-    { t: "Le digo dónde puede encontrar recursos y cómo proceder.", v:"condor" },
-    { t: "Ayudo a reorganizar la práctica para que no falle el grupo.", v:"oso" },
-    { t: "Le pregunto cómo se siente y si necesita acompañamiento.", v:"buho" }
-  ]},
-{ q: "Hay que repartir responsabilidades y nadie quiere encarar una tarea ingrata. ¿Qué haces?",
-  opts: [
-    { t: "Me ofrezco a asumirla si el equipo lo necesita.", v:"frailejon" },
-    { t: "Distribuyo las tareas de forma justa y clara.", v:"condor" },
-    { t: "Propongo un reto o incentivo para motivar quien la haga.", v:"oso" },
-    { t: "Explico por qué todos se benefician si se hace bien.", v:"buho" }
-  ]},
-{ q: "Alguien de tu grupo tuvo una emergencia familiar y no puede asistir. ¿Qué haces?",
-  opts: [
-    { t: "Me encargo de sus partes y lo ayudo a ponerse al día.", v:"frailejon" },
-    { t: "Le pregunto cómo se siente y si necesita algo.", v:"buho" },
-    { t: "Reorganizo tareas para cubrir su ausencia y seguir avanzando.", v:"condor" },
-    { t: "Animo al equipo a apoyarlo con una actividad colectiva.", v:"oso" }
-  ]},
-{ q: "Después de un taller nadie quiere limpiar. ¿Qué haces?",
-  opts: [
-    { t: "Comienzo a recoger y pido ayuda al resto.", v:"frailejon" },
-    { t: "Organizo un sistema de rotación para que sea justo.", v:"condor" },
-    { t: "Hago yo lo más pesado para que los demás colaboren.", v:"oso" },
-    { t: "Pregunto quién puede ayudar y animo a colaborar.", v:"buho" }
-  ]},
-{ q: "Un compañero no entiende una herramienta digital y está bloqueado. ¿Qué haces?",
-  opts: [
-    { t: "Me siento con él y lo oriento paso a paso.", v:"frailejon" },
-    { t: "Busco recursos o un estudiante con experiencia para que lo apoye.", v:"condor" },
-    { t: "Hago una demostración práctica para que lo vean y practiquen.", v:"oso" },
-    { t: "Le pregunto qué le causa estrés para apoyarle mejor.", v:"buho" }
-  ]},
-{ q: "Hay que recibir a padres en una jornada y faltan coordinadores. ¿Qué haces?",
-  opts: [
-    { t: "Me ofrezco para recibir y guiar a los padres.", v:"frailejon" },
-    { t: "Organizo un plan de recepción con roles claros.", v:"condor" },
-    { t: "Ayudo en la logística física y montaje.", v:"oso" },
-    { t: "Acompaño a quienes se sientan nerviosos o inseguros.", v:"buho" }
-  ]},
-{ q: "Un compañero se encarga de muchas tareas y parece sobrecargado. ¿Qué haces?",
-  opts: [
-    { t: "Le ofrezco bajar parte de su carga sin que me lo pida.", v:"frailejon" },
-    { t: "Le pregunto cómo organizar mejor las tareas para aliviarle.", v:"condor" },
-    { t: "Le doy apoyo práctico y tomo tareas concretas.", v:"oso" },
-    { t: "Le escucho y le doy apoyo emocional cuando lo necesite.", v:"buho" }
-  ]},
-{ q: "Se necesita un voluntario para acompañar a estudiantes pequeños en una salida. ¿Qué haces?",
-  opts: [
-    { t: "Me ofrezco y cuido que todos estén bien durante la salida.", v:"frailejon" },
-    { t: "Organizo turnos y logística para la salida.", v:"condor" },
-    { t: "Lidero actividades para mantener a los pequeños entretenidos y seguros.", v:"oso" },
-    { t: "Estoy atento a emociones y miedos de los niños para apoyarlos.", v:"buho" }
-  ]},
+/*11 */ {q:"En una caminata, alguien no logra ajustar bien su maleta.",
+  opts:[ {t:"Le pregunto cómo se está sintiendo con el peso.", v:"buho"},
+         {t:"Me ofrezco a ayudarle a ajustarla.", v:"frailejon"},
+         {t:"Se la dejo perfecta en dos minutos.", v:"oso"},
+         {t:"Le enseño una forma más eficiente de empacar.", v:"condor"} ]},
+/*12 */ {q:"Durante una práctica, el profesor pide voluntarios para mover implementos.",
+  opts:[ {t:"Animo a que todos cooperemos.", v:"buho"},
+         {t:"Me ofrezco sin dudarlo.", v:"frailejon"},
+         {t:"Lo hago rápido para avanzar.", v:"oso"},
+         {t:"Propongo una manera ordenada de hacerlo.", v:"condor"} ]},
+/*13 */ {q:"En un proyecto artístico, hace falta alguien que apoye detrás de escena.",
+  opts:[ {t:"Reviso cómo se siente el grupo.", v:"buho"},
+         {t:"Tomo el rol sin problema.", v:"frailejon"},
+         {t:"Ayudo en lo físico cuando toca.", v:"oso"},
+         {t:"Organizo las tareas de backstage.", v:"condor"} ]},
+/*14 */ {q:"En descanso, ves que el espacio quedó desordenado.",
+  opts:[ {t:"Comento que debemos cuidar el lugar.", v:"buho"},
+         {t:"Lo organizo sin esperar nada.", v:"frailejon"},
+         {t:"Busco a otros para hacerlo juntos.", v:"oso"},
+         {t:"Propongo una forma para mantenerlo ordenado.", v:"condor"} ]},
+/*15 */ {q:"En un trabajo grupal, alguien está atrasado.",
+  opts:[ {t:"Pregunto cómo está y qué lo tiene abrumado.", v:"buho"},
+         {t:"Le ayudo con la parte que falta.", v:"frailejon"},
+         {t:"Me pongo a hacerlo rápidamente.", v:"oso"},
+         {t:"Propongo redistribuir el trabajo.", v:"condor"} ]},
+/*16 */ {q:"Antes de salir del colegio en una actividad, alguien olvidó un material.",
+  opts:[ {t:"Le pregunto si está bien.", v:"buho"},
+         {t:"Le presto lo que necesite.", v:"frailejon"},
+         {t:"Voy a buscar lo que falta si es posible.", v:"oso"},
+         {t:"Propongo soluciones rápidas al grupo.", v:"condor"} ]},
+/*17 */ {q:"En práctica deportiva, un compañero se siente mareado.",
+  opts:[ {t:"Me quedo con él y lo tranquilizo.", v:"buho"},
+         {t:"Busco agua o apoyo inmediatamente.", v:"frailejon"},
+         {t:"Lo acompaño físicamente a un lugar seguro.", v:"oso"},
+         {t:"Sugiero cómo manejar la situación con calma.", v:"condor"} ]},
+/*18 */ {q:"En un proyecto del colegio, el equipo tiene ideas muy diferentes y el avance se detiene.",
+  opts:[ {t:"Escucho a todos y trato de encontrar un punto en común.", v:"buho"},
+         {t:"Me adapto a la idea que mejor ayude al grupo a avanzar.", v:"frailejon"},
+         {t:"Propongo organizar las ideas para tomar una decisión clara.", v:"oso"},
+         {t:"Sugiero una alternativa nueva que combine lo mejor de cada propuesta.", v:"condor"} ]},
+/*19 */ {q:"En un ensayo musical, falta alguien para una parte de apoyo.",
+  opts:[ {t:"Pregunto cómo están todos con el ensayo.", v:"buho"},
+         {t:"Tomo ese rol para ayudar.", v:"frailejon"},
+         {t:"Me cambio rápido de tarea y actúo.", v:"oso"},
+         {t:"Propongo reorganizar la pieza.", v:"condor"} ]},
+/*20 */ {q:"En una dinámica grupal, alguien tiene dificultades para entender las instrucciones.",
+  opts:[ {t:"Le explico con calma.", v:"buho"},
+         {t:"Practico con él aparte.", v:"frailejon"},
+         {t:"Le muestro haciéndolo.", v:"oso"},
+         {t:"Le hago un resumen claro.", v:"condor"} ]},
 
-/* OSO (21-30) */
-{ q: "Falta media hora para una demostración y el montaje está incompleto. ¿Qué haces?",
-  opts: [
-    { t: "Tomo herramientas y hago la parte más difícil yo mismo.", v:"oso" },
-    { t: "Pido calma y organizo pasos para terminar eficientemente.", v:"condor" },
-    { t: "Pregunto quién necesita ayuda y reparto tareas rápidas.", v:"frailejon" },
-    { t: "Animo al equipo y escucho si hay tensiones que frenen.", v:"buho" }
-  ]},
-{ q: "En una salida, el grupo se detiene por un obstáculo y nadie se anima a cruzarlo. ¿Qué haces?",
-  opts: [
-    { t: "Me adelanto y abro paso para que los demás sigan.", v:"oso" },
-    { t: "Ayudo a quienes lo necesiten a pasar el obstáculo.", v:"frailejon" },
-    { t: "Evalúo la ruta y propongo la alternativa más segura.", v:"condor" },
-    { t: "Animo y acompaño emocionalmente a los más inseguros.", v:"buho" }
-  ]},
-{ q: "Se rompe parte del montaje y hay que improvisar rápido. ¿Qué haces?",
-  opts: [
-    { t: "Arreglo la pieza o busco una solución práctica y rápida.", v:"oso" },
-    { t: "Pido a varios que den una mano para arreglarlo juntos.", v:"frailejon" },
-    { t: "Hago un plan de contingencia con pasos claros.", v:"condor" },
-    { t: "Calmo al equipo y escucho propuestas antes de actuar.", v:"buho" }
-  ]},
-{ q: "Quedan pocos minutos para entregar y faltan evidencias del proceso. ¿Qué haces?",
-  opts: [
-    { t: "Hago una demostración práctica clara y breve.", v:"oso" },
-    { t: "Recojo lo esencial y ayudo a documentarlo.", v:"frailejon" },
-    { t: "Organizo la evidencia y preparo un resumen ordenado.", v:"condor" },
-    { t: "Me aseguro de que todos se sientan tranquilos y acompañados.", v:"buho" }
-  ]},
-{ q: "Hay una actividad física retadora en la clase de educación física. ¿Qué haces?",
-  opts: [
-    { t: "Voy adelante para mostrar el camino y motivar.", v:"oso" },
-    { t: "Acompaño a los que van más lentos y los ayudo.", v:"frailejon" },
-    { t: "Me preocupo por la seguridad y doy instrucciones claras.", v:"condor" },
-    { t: "Estimo cómo se sienten los demás y les doy ánimo.", v:"buho" }
-  ]},
-{ q: "Un compañero duda en subir al escenario por miedo escénico. ¿Qué haces?",
-  opts: [
-    { t: "Le muestro cómo hacerlo con ejemplos prácticos y le acompaño.", v:"oso" },
-    { t: "Me ofrezco a practicar con él hasta que se sienta listo.", v:"frailejon" },
-    { t: "Le doy pasos concretos para enfrentar el miedo y estructurarlo.", v:"condor" },
-    { t: "Lo escucho y le doy contención emocional para tranquilizarlo.", v:"buho" }
-  ]},
-{ q: "Alguien no puede cargar un equipo pesado en la salida. ¿Qué haces?",
-  opts: [
-    { t: "Lo cargo yo mismo o lidero la tarea física.", v:"oso" },
-    { t: "Organizo a otros para que colaboren y lo ayuden a cargarlo.", v:"frailejon" },
-    { t: "Pienso la forma más segura y eficiente de moverlo.", v:"condor" },
-    { t: "Me aseguro de que la persona esté bien y no se lastime.", v:"buho" }
-  ]},
-{ q: "El equipo necesita velocidad y alguien tiene que iniciar ya. ¿Qué haces?",
-  opts: [
-    { t: "Doy el primer paso y comienzo la tarea de inmediato.", v:"oso" },
-    { t: "Verifico que nadie quede sin instrucciones y reparto.", v:"condor" },
-    { t: "Me pongo a apoyar a los más lentos para acelerar.", v:"frailejon" },
-    { t: "Animo a todos para que empiecen sin tensión.", v:"buho" }
-  ]},
-{ q: "En montaje técnico, se requiere mano y rapidez. ¿Qué haces?",
-  opts: [
-    { t: "Asumo la tarea física y la hago con foco.", v:"oso" },
-    { t: "Coordino y doy apoyo práctico a quien lo necesite.", v:"frailejon" },
-    { t: "Marco pasos claros para que el equipo sea eficiente.", v:"condor" },
-    { t: "Me fijo en cómo se sienten quienes lo hacen para que no fallen.", v:"buho" }
-  ]},
+/*21 */ {q:"En un reto físico de Latitud Norte, el grupo avanza lento.",
+  opts:[ {t:"Animo al grupo para que no se frustre.", v:"buho"},
+         {t:"Ayudo a quienes se quedan atrás.", v:"frailejon"},
+         {t:"Tomo la delantera para marcar ritmo.", v:"oso"},
+         {t:"Propongo una estrategia para avanzar mejor.", v:"condor"} ]},
+/*22 */ {q:"En educación física, el grupo está disperso.",
+  opts:[ {t:"Los llamo con calma para enfocarnos.", v:"buho"},
+         {t:"Reparto roles rápidamente.", v:"frailejon"},
+         {t:"Arranco la actividad con fuerza.", v:"oso"},
+         {t:"Organizo cómo funcionará el ejercicio.", v:"condor"} ]},
+/*23 */ {q:"En recreo, todos están sin energía.",
+  opts:[ {t:"Pregunto qué necesitan.", v:"buho"},
+         {t:"Pregunto qué actividad prefieren.", v:"frailejon"},
+         {t:"Propongo algo activo de una.", v:"oso"},
+         {t:"Armo un mini plan de juego.", v:"condor"} ]},
+/*24 */ {q:"En un ensayo, hay que mover elementos pesados.",
+  opts:[ {t:"Consulto cómo se sienten para hacerlo juntos.", v:"buho"},
+         {t:"Coordino quién mueve qué.", v:"frailejon"},
+         {t:"Empiezo a cargarlos.", v:"oso"},
+         {t:"Propongo una ruta segura.", v:"condor"} ]},
+/*25 */ {q:"El profesor pide iniciativa para arrancar un proyecto.",
+  opts:[ {t:"Reviso cómo está el grupo emocionalmente.", v:"buho"},
+         {t:"Ayudo a quienes no saben por dónde empezar.", v:"frailejon"},
+         {t:"Comienzo a trabajar inmediatamente.", v:"oso"},
+         {t:"Hago un esquema rápido.", v:"condor"} ]},
+/*26 */ {q:"En un reto creativo, un compañero no sabe cómo empezar.",
+  opts:[ {t:"Lo escucho y lo calmo.", v:"buho"},
+         {t:"Trabajo con él paso a paso.", v:"frailejon"},
+         {t:"Le muestro haciéndolo yo.", v:"oso"},
+         {t:"Le explico el proceso.", v:"condor"} ]},
+/*27 */ {q:"Falta poco tiempo en un trabajo manual.",
+  opts:[ {t:"Calmo al grupo.", v:"buho"},
+         {t:"Ayudo a quien va atrasado.", v:"frailejon"},
+         {t:"Trabajo rápido y con energía.", v:"oso"},
+         {t:"Divido tareas.", v:"condor"} ]},
+/*28 */ {q:"Antes de una competencia amistosa, todos están indecisos.",
+  opts:[ {t:"Los motivo.", v:"buho"},
+         {t:"Reparto funciones.", v:"frailejon"},
+         {t:"Salgo al frente para activarnos.", v:"oso"},
+         {t:"Repaso la estrategia.", v:"condor"} ]},
+/*29 */ {q:"En una actividad al aire libre, hay que montar un espacio.",
+  opts:[ {t:"Pregunto quién necesita apoyo.", v:"buho"},
+         {t:"Ayudo a montar.", v:"frailejon"},
+         {t:"Lo hago rápido y voy por más.", v:"oso"},
+         {t:"Propongo una forma ordenada.", v:"condor"} ]},
+/*30 */ {q:"En un simulacro, hay confusión.",
+  opts:[ {t:"Calmo al grupo.", v:"buho"},
+         {t:"Ayudo a quienes se quedaron atrás.", v:"frailejon"},
+         {t:"Tomo la iniciativa y sigo la ruta.", v:"oso"},
+         {t:"Organizo la información.", v:"condor"} ]},
 
-/* CÓNDOR (31-40) */
-{ q: "El profesor solicita un plan claro de trabajo y nadie sabe por dónde empezar. ¿Qué haces?",
-  opts: [
-    { t: "Propongo un plan con tareas y tiempos claros en la pizarra.", v:"condor" },
-    { t: "Pregunto qué les preocupa para incluirlo en el plan.", v:"buho" },
-    { t: "Me ofrezco a realizar la parte técnica para que avance.", v:"frailejon" },
-    { t: "Sugiero que empecemos ahora y ajustemos después.", v:"oso" }
-  ]},
-{ q: "Hay varias ideas y hay que elegir la mejor rápidamente. ¿Qué haces?",
-  opts: [
-    { t: "Hago una tabla con pros y contras para comparar.", v:"condor" },
-    { t: "Pregunto cómo se siente cada quien con las propuestas.", v:"buho" },
-    { t: "Propongo una votación rápida y actuamos.", v:"oso" },
-    { t: "Trato de combinar las ideas buenas de todas.", v:"frailejon" }
-  ]},
-{ q: "Tienen que justificar ante el profesor una decisión tomada. ¿Qué haces?",
-  opts: [
-    { t: "Preparo una explicación ordenada y con argumentos claros.", v:"condor" },
-    { t: "Me aseguro de que todos se sientan representados en la justificación.", v:"buho" },
-    { t: "Hacemos una demostración práctica que respalde la decisión.", v:"oso" },
-    { t: "Ayudo a documentar quién hizo qué en la ejecución.", v:"frailejon" }
-  ]},
-{ q: "El grupo no tiene criterios para evaluarse. ¿Qué haces?",
-  opts: [
-    { t: "Propongo indicadores claros y medibles para evaluar.", v:"condor" },
-    { t: "Recojo opiniones para que la evaluación sea justa.", v:"buho" },
-    { t: "Propongo pequeñas pruebas para comprobar resultados.", v:"oso" },
-    { t: "Me ofrezco a aplicar y ayudar con la evaluación.", v:"frailejon" }
-  ]},
-{ q: "Debes tomar una decisión con información incompleta. ¿Qué haces?",
-  opts: [
-    { t: "Recojo los datos mínimos y decido con criterios claros.", v:"condor" },
-    { t: "Consulto cómo se sienten las personas afectadas con cada opción.", v:"buho" },
-    { t: "Tomo una decisión rápida y ajustamos si hace falta.", v:"oso" },
-    { t: "Busco apoyo práctico de quienes tengan más experiencia.", v:"frailejon" }
-  ]},
-{ q: "Quieren mejorar el proceso para la próxima vez. ¿Qué haces?",
-  opts: [
-    { t: "Diseño un procedimiento con pasos claros y responsables.", v:"condor" },
-    { t: "Recojo observaciones de todos para una mejora participativa.", v:"buho" },
-    { t: "Propongo cambios rápidos y prácticos para probarlos.", v:"oso" },
-    { t: "Me ofrezco a liderar la implementación de la mejora.", v:"frailejon" }
-  ]},
-{ q: "Hay que presentar evidencia y el profesor exige orden y claridad. ¿Qué haces?",
-  opts: [
-    { t: "Preparo un informe o presentación estructurada y concisa.", v:"condor" },
-    { t: "Incluyo cómo fue el proceso humano y la colaboración del equipo.", v:"buho" },
-    { t: "Hago una demostración práctica clara y breve.", v:"oso" },
-    { t: "Organizo la documentación y la dejo lista para entregar.", v:"frailejon" }
-  ]},
-{ q: "En un proyecto complejo, hay confusión sobre responsabilidades. ¿Qué haces?",
-  opts: [
-    { t: "Defino roles, entregables y fechas claras para cada quien.", v:"condor" },
-    { t: "Pregunto cómo se sienten con sus responsabilidades.", v:"buho" },
-    { t: "Ayudo en la parte práctica para acelerar el proceso.", v:"oso" },
-    { t: "Ofrezco apoyo a quien vea que no puede cumplir.", v:"frailejon" }
-  ]},
-{ q: "Surge una duda técnica que nadie sabe resolver. ¿Qué haces?",
-  opts: [
-    { t: "Investigo y propongo la solución más lógica posible.", v:"condor" },
-    { t: "Pregunto si alguien tiene experiencia y la integro.", v:"frailejon" },
-    { t: "Lo pruebo de forma práctica para verificar si funciona.", v:"oso" },
-    { t: "Me aseguro de que el equipo entienda la solución desde lo humano.", v:"buho" }
-  ]},
-{ q: "Necesitan priorizar varias tareas con poco tiempo. ¿Qué haces?",
-  opts: [
-    { t: "Hago una lista priorizada según impacto y esfuerzo.", v:"condor" },
-    { t: "Pregunto si alguien tiene necesidades urgentes que atender.", v:"buho" },
-    { t: "Elijo una tarea y la empiezo para generar avance.", v:"oso" },
-    { t: "Me ofrezco a tomar la parte que nadie quiere para aliviar al grupo.", v:"frailejon" }
-  ]}
+/*31 */ {q:"El profesor da instrucciones muy generales.",
+  opts:[ {t:"Pregunto cómo se sienten con la tarea.", v:"buho"},
+         {t:"Organizo pequeñas partes con el grupo.", v:"frailejon"},
+         {t:"Empiezo a hacer algo para avanzar.", v:"oso"},
+         {t:"Ordeno la información para volverla clara.", v:"condor"} ]},
+/*32 */ {q:"En una caminata, el grupo debe decidir por qué camino seguir.",
+  opts:[ {t:"Verifico que todos estén tranquilos.", v:"buho"},
+         {t:"Acompaño a quien tenga dudas.", v:"frailejon"},
+         {t:"Camino primero para explorar.", v:"oso"},
+         {t:"Analizo la ruta y propongo la mejor opción.", v:"condor"} ]},
+/*33 */ {q:"En un ensayo de música o teatro, algo no está fluyendo.",
+  opts:[ {t:"Pregunto cómo se sienten con la parte.", v:"buho"},
+         {t:"Ayudo a practicar lo que falta.", v:"frailejon"},
+         {t:"Actúo/ejecuto marcando un ritmo.", v:"oso"},
+         {t:"Propongo ajustar la estructura.", v:"condor"} ]},
+/*34 */ {q:"En un partido cerrado, quedan pocos minutos.",
+  opts:[ {t:"Los motivo desde lo emocional.", v:"buho"},
+         {t:"Hago la jugada que más beneficie al equipo.", v:"frailejon"},
+         {t:"Tomo la iniciativa con energía.", v:"oso"},
+         {t:"Propongo una jugada estratégica.", v:"condor"} ]},
+/*35 */ {q:"En clase, deben resolver un caso complejo.",
+  opts:[ {t:"Escucho a todos.", v:"buho"},
+         {t:"Divido partes del análisis.", v:"frailejon"},
+         {t:"Empiezo a resolver.", v:"oso"},
+         {t:"Organizo el método.", v:"condor"} ]},
+/*36 */ {q:"Hay tensión entre dos compañeros.",
+  opts:[ {t:"Los escucho por separado.", v:"buho"},
+         {t:"Intento mediar.", v:"frailejon"},
+         {t:"Propongo salir a caminar para calmarse.", v:"oso"},
+         {t:"Analizo qué generó el conflicto.", v:"condor"} ]},
+/*37 */ {q:"Antes de una salida, deben empacar bien.",
+  opts:[ {t:"Pregunto quién está nervioso.", v:"buho"},
+         {t:"Reviso que todos tengan lo básico.", v:"frailejon"},
+         {t:"Empaco rápido y ayudo.", v:"oso"},
+         {t:"Creo un esquema de empaque.", v:"condor"} ]},
+/*38 */ {q:"El profesor propone un debate.",
+  opts:[ {t:"Me enfoco en cómo se sienten frente al tema.", v:"buho"},
+         {t:"Ayudo a que todos participen.", v:"frailejon"},
+         {t:"Hablo con fuerza al inicio.", v:"oso"},
+         {t:"Estructuro mis ideas antes de hablar.", v:"condor"} ]},
+/*39 */ {q:"En descanso, el grupo quiere planear algo para hacer.",
+  opts:[ {t:"Pregunto qué les gustaría emocionalmente.", v:"buho"},
+         {t:"Propongo algo que nos incluya a todos.", v:"frailejon"},
+         {t:"Sugiero algo activo.", v:"oso"},
+         {t:"Armo un mini plan con tiempos.", v:"condor"} ]},
+/*40 */ {q:"En un proyecto largo, queda poco tiempo.",
+  opts:[ {t:"Verifico que nadie esté colapsando.", v:"buho"},
+         {t:"Hago lo que queda para aliviar al grupo.", v:"frailejon"},
+         {t:"Trabajo rápido para avanzar.", v:"oso"},
+         {t:"Ordeno prioridades para terminar.", v:"condor"} ]},
 ]; // end QUESTIONS
 
-/* ---------------------------
-   Mezclado real y paginado
-   --------------------------- */
-const TOTAL = QUESTIONS.length;
-let shuffled = QUESTIONS.slice().sort(()=>Math.random() - 0.5); // shuffle questions
+/* =========================
+   LÓGICA: mezclar, paginar, respuestas
+   ========================= */
+let shuffledQs = QUESTIONS.slice().sort(()=> Math.random() - 0.5); // random order
 const PAGE_SIZE = 10;
 let currentPage = 0;
-const totalPages = Math.ceil(shuffled.length / PAGE_SIZE);
-
-// store answers by global question index in shuffled array
-const answers = new Array(shuffled.length).fill(null);
+const totalPages = Math.ceil(shuffledQs.length / PAGE_SIZE);
+const answers = {}; // key: global question index -> 'buho'|'frailejon'|'oso'|'condor'
 
 const quizDiv = document.getElementById('quiz');
 const progressBar = document.getElementById('progressBar');
+const pageInfo = document.getElementById('pageInfo');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
-const pageInfo = document.getElementById('pageInfo');
-const resultBlock = document.getElementById('resultBlock');
+const resultDiv = document.getElementById('result');
 
-/* Render page of questions */
+function escapeHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* render single page of questions */
 function renderPage(){
-  quizDiv.innerHTML = '';
+  quizDiv.innerHTML = "";
   const start = currentPage * PAGE_SIZE;
-  const pageQs = shuffled.slice(start, start + PAGE_SIZE);
+  const pageQs = shuffledQs.slice(start, start + PAGE_SIZE);
 
-  pageQs.forEach((qItem, idx) => {
-    const globalIndex = start + idx;
-    // build question box
+  pageQs.forEach((qItem, i) => {
+    const globalIndex = start + i;
     const qBox = document.createElement('div');
-    qBox.className = 'question page active';
-    // shuffle options each render for fairness
-    const optsShuffled = qItem.opts.slice().sort(()=>Math.random() - 0.5);
-
-    let html = `<h4>${globalIndex + 1}. ${escapeHtml(qItem.q)}</h4><div class="opts" id="opts_${globalIndex}">`;
-    optsShuffled.forEach((opt, oi) => {
-      const inputId = `q_${globalIndex}_opt_${oi}`;
-      html += `<label class="opt"><input type="radio" name="q_${globalIndex}" id="${inputId}" value="${opt.v}" ${answers[globalIndex] === opt.v ? 'checked' : ''}> <div style="flex:1">${escapeHtml(opt.t)}</div></label>`;
-    });
-    html += `</div>`;
-    qBox.innerHTML = html;
+    qBox.className = 'page active question';
+    qBox.innerHTML = `<h4>${globalIndex+1}. ${escapeHtml(qItem.q)}</h4><div class="opts" id="opts_${globalIndex}"></div>`;
     quizDiv.appendChild(qBox);
 
-    // attach listeners to inputs
-    const inputs = qBox.querySelectorAll(`input[name="q_${globalIndex}"]`);
-    inputs.forEach(inp=>{
-      inp.addEventListener('change', (e)=>{
-        answers[globalIndex] = e.target.value;
+    const optsDiv = document.getElementById(`opts_${globalIndex}`);
+    // shuffle options too
+    const optsShuffled = qItem.opts.slice().sort(()=> Math.random() - 0.5);
+    optsShuffled.forEach((opt, oi) => {
+      const id = `q_${globalIndex}_o_${oi}`;
+      const pillClass = opt.v === 'buho' ? 'buho' : opt.v === 'frailejon' ? 'fraile' : opt.v === 'oso' ? 'oso' : 'condor';
+      const pillLetter = opt.v === 'buho' ? 'A' : opt.v === 'frailejon' ? 'B' : opt.v === 'oso' ? 'C' : 'D';
+
+      // create label with visible radio input (so user sees selection)
+      const label = document.createElement('label');
+      label.className = 'opt';
+      label.htmlFor = id;
+
+      label.innerHTML = `
+        <div class="pill ${pillClass}">${pillLetter}</div>
+        <div style="flex:1;display:flex;gap:10px;align-items:flex-start">
+          <input type="radio" name="q_${globalIndex}" id="${id}" value="${opt.v}" />
+          <div style="min-height:1.2em">${escapeHtml(opt.t)}</div>
+        </div>
+      `;
+
+      // set initial checked state if already answered
+      const radioInput = label.querySelector('input[type="radio"]');
+      if(answers[globalIndex] === opt.v){
+        radioInput.checked = true;
+        label.classList.add('selected');
+      }
+
+      // when clicking label or input -> set answer, mark selected
+      const setAnswer = () => {
+        answers[globalIndex] = opt.v;
+        // unselect sibling labels in this optsDiv
+        const siblings = optsDiv.querySelectorAll('label.opt');
+        siblings.forEach(s => s.classList.remove('selected'));
+        label.classList.add('selected');
+        // ensure actual radio checked
+        const r = label.querySelector('input[type="radio"]');
+        if(r) r.checked = true;
         updateProgress();
+      };
+
+      // input change event
+      radioInput.addEventListener('change', setAnswer);
+      // label click (covers clicking outer area)
+      label.addEventListener('click', (e) => {
+        // if click came from input it's already handled; still call setAnswer
+        setAnswer();
       });
+
+      optsDiv.appendChild(label);
     });
   });
 
+  // update nav
   prevBtn.disabled = currentPage === 0;
   nextBtn.textContent = currentPage === totalPages - 1 ? 'Finalizar' : 'Siguiente';
   updateProgress();
+  pageInfo.textContent = `Página ${currentPage+1} / ${totalPages} · Respondidas ${Object.keys(answers).length} / ${shuffledQs.length}`;
 }
 
-/* helper to escape HTML */
-function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
+/* update progress UI */
 function updateProgress(){
-  const answered = answers.filter(a=>a!==null).length;
-  const pct = Math.round((answered / shuffled.length) * 100);
-  document.getElementById('progressBar').style.width = pct + '%';
-  pageInfo.textContent = `Página ${currentPage+1} / ${totalPages} · Respondidas ${answered} / ${shuffled.length}`;
+  const done = Object.keys(answers).length;
+  const pct = Math.round((done / shuffledQs.length) * 100);
+  progressBar.style.width = pct + '%';
+  pageInfo.textContent = `Página ${currentPage+1} / ${totalPages} · Respondidas ${done} / ${shuffledQs.length}`;
 }
 
-/* Navigation */
+/* navigation */
 function nextPage(){
   // validate current page all answered
   const start = currentPage * PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, shuffled.length);
+  const end = Math.min(start + PAGE_SIZE, shuffledQs.length);
   for(let i=start;i<end;i++){
-    if(answers[i] === null){
+    if(!answers.hasOwnProperty(i)){
       alert('Por favor responde todas las preguntas de la página antes de continuar. Falta la pregunta ' + (i+1));
-      const el = document.getElementById(`opts_${i}`);
-      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      document.getElementById(`opts_${i}`).scrollIntoView({behavior:'smooth', block:'center'});
       return;
     }
   }
@@ -441,172 +475,201 @@ function nextPage(){
   if(currentPage < totalPages - 1){
     currentPage++;
     renderPage();
-    window.scrollTo({top:0, behavior:'smooth'});
+    window.scrollTo({top:0,behavior:'smooth'});
   } else {
-    // finalize
     computeResults();
   }
 }
 
 function prevPage(){
-  if(currentPage > 0){
-    currentPage--;
-    renderPage();
-    window.scrollTo({top:0, behavior:'smooth'});
-  }
+  if(currentPage>0){ currentPage--; renderPage(); window.scrollTo({top:0,behavior:'smooth'}); }
 }
 
-/* Compute results, show result page with radar & profile */
+/* compute results & render final screen (same page) */
 function computeResults(){
-  // count per archetype
+  // tally
   const counts = { buho:0, frailejon:0, oso:0, condor:0 };
-  answers.forEach(a => { if(a && counts.hasOwnProperty(a)) counts[a]++; });
-  const total = Object.values(counts).reduce((s,n)=>s+n,0) || 1;
+  for(let i=0;i<shuffledQs.length;i++){
+    const v = answers[i];
+    if(v && counts.hasOwnProperty(v)) counts[v]++;
+  }
+  const total = counts.buho + counts.frailejon + counts.oso + counts.condor || 1;
   const percent = {
     buho: Math.round(counts.buho / total * 100),
     frailejon: Math.round(counts.frailejon / total * 100),
     oso: Math.round(counts.oso / total * 100),
     condor: Math.round(counts.condor / total * 100)
   };
-
-  // determine dominant (tie-break by raw count then key)
-  const ordered = Object.entries(counts).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
+  // dominant
+  const ordered = Object.entries(percent).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
   const dominantKey = ordered[0][0];
 
-  // hide quiz UI
+  // hide quiz
   document.querySelector('.progress').style.display = 'none';
-  quizDiv.style.display = 'none';
   document.querySelector('.nav').style.display = 'none';
+  quizDiv.style.display = 'none';
 
-  // show results block
-  resultBlock.style.display = 'block';
-  resultBlock.innerHTML = `
-    <div class="grid2">
-      <div class="card" style="border-left:6px solid var(--buho)"><strong>Búho (empatía)</strong><div style="font-size:28px;margin-top:8px;color:var(--buho)">${percent.buho}%</div></div>
-      <div class="card" style="border-left:6px solid var(--frailejon)"><strong>Frailejón (servicio)</strong><div style="font-size:28px;margin-top:8px;color:var(--frailejon)">${percent.frailejon}%</div></div>
-      <div class="card" style="border-left:6px solid var(--oso)"><strong>Oso Andino (acción)</strong><div style="font-size:28px;margin-top:8px;color:var(--oso)">${percent.oso}%</div></div>
-      <div class="card" style="border-left:6px solid var(--condor)"><strong>Cóndor (racional)</strong><div style="font-size:28px;margin-top:8px;color:var(--condor)">${percent.condor}%</div></div>
-    </div>
-
-    <div class="dominant">
-      <h3 id="dominantTitle"></h3>
-      <div id="dominantDesc" style="margin-top:8px"></div>
-    </div>
-
-    <div class="grid2" style="margin-top:14px">
-      <div class="card">
-        <canvas id="radarChart" width="400" height="300"></canvas>
-      </div>
-      <div class="card">
-        <h4>Análisis completo</h4>
-        <div id="fullProfile" style="margin-top:8px"></div>
-        <div class="actions">
-          <button class="primary" id="downloadPdfBtn">Descargar informe (PDF)</button>
-          <button class="secondary" id="restartBtn">Reiniciar test</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // profiles / DOFA data
+  // prepare profile content
   const profiles = {
     buho: {
       title: 'BÚHO — Lidera desde la empatía',
-      desc: 'Priorizas la escucha, la inclusión y el bienestar del grupo. Generas espacios de confianza y sueles anticipar necesidades emocionales de tus compañeros.',
-      characteristics: ['Escucha activa', 'Sensibilidad social', 'Mediación y contención'],
-      motivates: ['Ayudar a otros', 'Mantener relaciones sanas', 'Que todos participen'],
-      values: ['Empatía', 'Respeto', 'Cuidado colectivo'],
-      communication: 'Prefieres conversaciones cara a cara, preguntas abiertas y tiempos para expresar emociones. Respondes bien a feedback en tono amable.',
-      shadows: ['Evitar confrontaciones', 'Sobrecarga emocional', 'Dificultad para decisiones impopulares'],
+      color: 'var(--accent)',
+      badgeColor: '#2f6b3a',
+      desc: 'Lideras poniendo atención al clima emocional y a la inclusión. Generas espacios donde las personas se sienten escuchadas y cuidadas.',
+      characteristics: ['Escucha activa','Sensibilidad emocional','Capacidad para mediar'],
+      motivates: ['Apoyar a otros','Mantener la armonía','Que todos participen'],
+      values: ['Empatía','Respeto','Cuidado mutuo'],
+      communication: 'Prefieres conversaciones cara a cara y tiempos de escucha. Respondes bien a preguntas abiertas.',
+      shadows: ['Evitar confrontaciones necesarias','Sobrecarga emocional','Dificultad para decisiones impopulares'],
       dofa: {
-        F: ['Alta conexión interpersonal', 'Habilidad para mediar', 'Crea climas seguros'],
-        O: ['Formación en límites y asertividad', 'Alianza con perfiles más estructurados'],
-        D: ['Tendencia a asumir problemas ajenos', 'Poca tolerancia a la frialdad o rigor excesivo'],
-        A: ['Burnout emocional', 'Ser percibido como poco firme']
+        F:['Conexión interpersonal','Habilidad de contención','Promueve cohesión'],
+        O:['Formación en límites y asertividad','Rol de facilitador escolar'],
+        D:['Sobrecarga emocional','Priorizar relaciones sobre resultados'],
+        A:['Burnout emocional','Ser percibido como poco firme']
       },
-      recommendations: ['Practica decir "no" y delegar', 'Usa herramientas estructuradas (cronogramas) para decisiones', 'Reserva tiempo para tu autocuidado']
+      recs: ['Practica decir "no" cuando haga falta','Alíate con perfiles decisores','Reserva tiempo para recuperarte']
     },
     frailejon: {
       title: 'FRAILEJÓN — Lidera desde el servicio',
-      desc: 'Lideras sosteniendo al equipo: asumes tareas, ayudas en lo operativo y te aseguras de que nadie se quede atrás. Tu apoyo es práctico y confiable.',
-      characteristics: ['Disposición a ayudar', 'Constancia', 'Soporte operativo'],
-      motivates: ['Ver al equipo avanzar', 'Acompañar el aprendizaje', 'Contribuir al bien común'],
-      values: ['Servicio', 'Responsabilidad', 'Humildad'],
-      communication: 'Mensajes prácticos y orientados a la acción; valoras el reconocimiento por tu aporte.',
-      shadows: ['Sobreasumir responsabilidades', 'Dificultad para pedir ayuda'],
+      color: 'var(--fraile)',
+      badgeColor: '#b07f2d',
+      desc: 'Sostienes la operación con acciones concretas. Te preocupas porque todo funcione y porque nadie quede atrás.',
+      characteristics: ['Disponibilidad','Constancia','Fiabilidad operativa'],
+      motivates: ['Ver al equipo avanzar','Apoyar a quienes lo necesitan','Contribuir al bien común'],
+      values: ['Servicio','Responsabilidad','Humildad'],
+      communication: 'Mensajes prácticos y orientados a la ayuda. Aprecias reconocimiento por tu aporte.',
+      shadows: ['Asumir demasiadas tareas','Dificultad para pedir apoyo'],
       dofa: {
-        F: ['Sostén operativo del grupo', 'Alta disponibilidad', 'Capacidad de ejecución práctica'],
-        O: ['Aprender a priorizar', 'Visibilizar aportes y delegar eficazmente'],
-        D: ['Riesgo de agotamiento', 'Poca búsqueda de crédito propio'],
-        A: ['Agotamiento físico/emocional', 'Invisibilización del trabajo']
+        F:['Sostén operativo','Alta disponibilidad','Consistencia'],
+        O:['Visibilizar aportes','Delegar mejor'],
+        D:['Riesgo de agotamiento','Menos búsqueda de reconocimiento'],
+        A:['Ser pasado por alto','Agotamiento físico/emocional']
       },
-      recommendations: ['Fija límites claros y prioridades', 'Comunica tus logros y solicita apoyo', 'Aprende técnicas de delegación']
+      recs: ['Establece límites y prioridades','Pide reconocimiento cuando haga falta','Practica delegar']
     },
     oso: {
       title: 'OSO ANDINO — Lidera desde la acción',
-      desc: 'Eres práctico, enérgico y tomas la iniciativa. Lideras con el ejemplo, movilizas al equipo y resuelves en contexto con rapidez.',
-      characteristics: ['Iniciativa', 'Resiliencia', 'Liderazgo por ejemplo'],
-      motivates: ['Retos concretos', 'Resultados visibles', 'Superar obstáculos'],
-      values: ['Acción', 'Disciplina', 'Compromiso'],
-      communication: 'Directa y orientada a la acción; prefieres instrucciones concretas y feedback inmediato.',
-      shadows: ['Impulsividad', 'Poca paciencia con procesos largos'],
+      color: 'var(--oso)',
+      badgeColor: '#6d4b32',
+      desc: 'Actúas con iniciativa: arrancas, ejecutas y movilizas al equipo para que avance y consiga resultados visibles.',
+      characteristics: ['Iniciativa','Energía','Resiliencia práctica'],
+      motivates: ['Retos reales','Resultados visibles','Superar obstáculos'],
+      values: ['Acción','Disciplina','Compromiso'],
+      communication: 'Directo y concreto; valoras instrucciones claras y feedback inmediato.',
+      shadows: ['Impulsividad','Impaciencia','Tendencia a cargar demasiado'],
       dofa: {
-        F: ['Alta capacidad de movilización', 'Eficacia en crisis', 'Motiva con el ejemplo'],
-        O: ['Formación en planificación', 'Alianzas con perfiles analíticos'],
-        D: ['Impulsividad', 'Posible falta de visión a largo plazo'],
-        A: ['Desgaste si no regula ritmo', 'Conflictos por estilo directo']
+        F:['Alta ejecución','Ejemplo movilizador','Resiliencia'],
+        O:['Formación en planificación','Alianzas con analíticos'],
+        D:['Impulsividad','Poca visión a largo plazo'],
+        A:['Desgaste físico/mental','Conflictos por estilo directo']
       },
-      recommendations: ['Combina acción con pausas breves de reflexión', 'Comunica el porqué de tus decisiones', 'Alíate con perfiles condor para planificar']
+      recs: ['Toma micro-pausas para reflexionar','Alíate con perfiles estructurados','Comunica el porqué']
     },
     condor: {
       title: 'CÓNDOR — Lidera desde la razón y la estrategia',
-      desc: 'Aportas estructura, análisis y criterios. Tu enfoque facilita decisiones informadas y procesos ordenados que ayudan al equipo a ser eficiente.',
-      characteristics: ['Pensamiento crítico', 'Organización', 'Toma de decisiones basada en datos'],
-      motivates: ['Resolver problemas complejos', 'Optimizar procesos', 'Trabajar con evidencia'],
-      values: ['Claridad', 'Precisión', 'Eficiencia'],
-      communication: 'Estructurada y lógica; aprecias explicaciones concisas y justificaciones claras.',
-      shadows: ['Distanciamiento emocional', 'Parálisis por análisis'],
+      color: 'var(--condor)',
+      badgeColor: '#254f8a',
+      desc: 'Aportas estructura, análisis y claridad. Te encargas de organizar, planificar y justificar decisiones con criterios claros.',
+      characteristics: ['Pensamiento analítico','Organización','Toma de decisiones fundamentada'],
+      motivates: ['Resolver problemas complejos','Optimizar procesos','Trabajar con evidencia'],
+      values: ['Claridad','Precisión','Eficiencia'],
+      communication: 'Estructurada y lógica; valoras datos y pasos claros.',
+      shadows: ['Distanciamiento emocional','Exceso de análisis'],
       dofa: {
-        F: ['Capacidad analítica', 'Organización y estructura', 'Visión estratégica'],
-        O: ['Desarrollar empatía comunicativa', 'Adoptar métodos ágiles para ejecutar rápidamente'],
-        D: ['Rigidez', 'Dificultad para gestionar incertidumbre emocional'],
-        A: ['Percepción de frialdad', 'Resistencia de equipos menos estructurados']
+        F:['Capacidad analítica','Organización','Visión estratégica'],
+        O:['Desarrollar empatía comunicativa','Métodos ágiles para evitar parálisis'],
+        D:['Rigidez','Dificultad para gestionar incertidumbre'],
+        A:['Percepción de frialdad','Resistencia en equipos menos estructurados']
       },
-      recommendations: ['Sintetiza tus ideas en 1-2 frases', 'Valida emociones antes de exponer datos', 'Usa prototipos para evitar exceso de análisis']
+      recs: ['Sintetiza ideas en 1–2 frases','Valida emociones antes de presentar datos','Usa prototipos para evitar parálisis']
     }
   };
 
-  // fill dominant
-  const domTitle = resultBlock.querySelector('#dominantTitle');
-  const domDesc = resultBlock.querySelector('#dominantDesc');
-  domTitle.textContent = profiles[dominantKey].title;
-  domDesc.innerHTML = `<em>${profiles[dominantKey].desc}</em>`;
+  // render result container
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `
+    <div class="grid2" id="resultGrid" style="align-items:start">
+      <div class="profileCard" id="leftCard">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div>
+            <div style="font-size:13px;color:var(--muted)">Resultados</div>
+            <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+              <div style="padding:10px;border-radius:12px;background:rgba(138,166,138,0.08)"><strong>Búho</strong><div style="font-size:20px;color:var(--accent)">${percent.buho}%</div></div>
+              <div style="padding:10px;border-radius:12px;background:rgba(217,191,87,0.06)"><strong>Frailejón</strong><div style="font-size:20px;color:var(--fraile)">${percent.frailejon}%</div></div>
+              <div style="padding:10px;border-radius:12px;background:rgba(139,106,74,0.06)"><strong>Oso</strong><div style="font-size:20px;color:var(--oso)">${percent.oso}%</div></div>
+              <div style="padding:10px;border-radius:12px;background:rgba(74,111,177,0.06)"><strong>Cóndor</strong><div style="font-size:20px;color:var(--condor)">${percent.condor}%</div></div>
+            </div>
+          </div>
+          <div style="min-width:210px;text-align:right">
+            <div class="dominantTitle" id="dominantBig">${profiles[dominantKey].title.split('—')[0].trim()}</div>
+            <div class="dominantSubtitle">${profiles[dominantKey].title.split('—')[1].trim()}</div>
+            <div><span class="dominantBadge" id="dominantBadge" style="background:${profiles[dominantKey].badgeColor};font-size:15px">${profiles[dominantKey].title.split('—')[1].trim()}</span></div>
+          </div>
+        </div>
 
-  // fill full profile
-  const fullProfileEl = resultBlock.querySelector('#fullProfile');
-  const p = profiles[dominantKey];
-  fullProfileEl.innerHTML = `
-    <strong>Características</strong>
-    <ul>${p.characteristics.map(x=>`<li>${x}</li>`).join('')}</ul>
-    <strong>Qué te motiva</strong>
-    <ul>${p.motivates.map(x=>`<li>${x}</li>`).join('')}</ul>
-    <strong>Qué valoras en el equipo</strong>
-    <ul>${p.values.map(x=>`<li>${x}</li>`).join('')}</ul>
-    <strong>Cómo comunicarte</strong><p>${p.communication}</p>
-    <strong>Sombras</strong><p>${p.shadows.join('; ')}</p>
-    <h4>DOFA</h4>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><strong>Fortalezas</strong><ul>${p.dofa.F.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-      <div><strong>Oportunidades</strong><ul>${p.dofa.O.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-      <div><strong>Debilidades</strong><ul>${p.dofa.D.map(x=>`<li>${x}</li>`).join('')}</ul></div>
-      <div><strong>Amenazas</strong><ul>${p.dofa.A.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        <div style="margin-top:12px;background:linear-gradient(180deg,#fff,#fbfbfb);padding:12px;border-radius:10px;border:1px solid var(--line)">
+          <canvas id="radarChart" style="max-height:360px;"></canvas>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+          <button class="primary" id="downloadPdfBtn">Descargar PDF (completo)</button>
+          <button class="ghost" id="restartBtn">Reiniciar test</button>
+        </div>
+      </div>
+
+      <div class="profileCard" id="profileLong">
+        <!-- perfil largo será insertado aquí -->
+      </div>
     </div>
-    <strong>Recomendaciones</strong><ul>${p.recommendations.map(x=>`<li>${x}</li>`).join('')}</ul>
   `;
 
-  // draw radar
-  const ctx = resultBlock.querySelector('#radarChart').getContext('2d');
-  const radar = new Chart(ctx, {
+  // fill full profile on right card
+  const p = profiles[dominantKey];
+  const profileLong = document.getElementById('profileLong');
+  profileLong.innerHTML = `
+    <h3 style="margin:0 0 6px">${p.title}</h3>
+    <p style="margin:0 0 12px;color:var(--muted)"><em>${p.desc}</em></p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <strong>Características</strong>
+        <ul>${p.characteristics.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <strong>Motivaciones</strong>
+        <ul>${p.motivates.map(x=>`<li>${x}</li>`).join('')}</ul>
+      </div>
+      <div>
+        <strong>Qué valoras en tu equipo</strong>
+        <ul>${p.values.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <strong>Cómo comunicarse contigo</strong>
+        <p style="margin:6px 0 0">${p.communication}</p>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <strong>Sombras</strong>
+      <p style="margin:6px 0 10px">${p.shadows.join('; ')}</p>
+
+      <h4 style="margin-top:6px">DOFA</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#fbfbfb;padding:8px;border-radius:8px"><strong>Fortalezas</strong><ul>${p.dofa.F.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+        <div style="background:#fbfbfb;padding:8px;border-radius:8px"><strong>Oportunidades</strong><ul>${p.dofa.O.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+        <div style="background:#fbfbfb;padding:8px;border-radius:8px"><strong>Debilidades</strong><ul>${p.dofa.D.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+        <div style="background:#fbfbfb;padding:8px;border-radius:8px"><strong>Amenazas</strong><ul>${p.dofa.A.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+      </div>
+
+      <strong style="display:block;margin-top:12px">Recomendaciones prácticas</strong>
+      <ul>${p.recs.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>
+  `;
+
+  // chart
+  const ctx = document.getElementById('radarChart').getContext('2d');
+  const bg = dominantKey === 'buho' ? 'rgba(138,166,138,0.16)' :
+             dominantKey === 'frailejon' ? 'rgba(217,191,87,0.14)' :
+             dominantKey === 'oso' ? 'rgba(139,106,74,0.12)' :
+             'rgba(74,111,177,0.12)';
+
+  new Chart(ctx, {
     type: 'radar',
     data: {
       labels: ['Búho','Frailejón','Oso Andino','Cóndor'],
@@ -614,80 +677,84 @@ function computeResults(){
         label: 'Porcentaje',
         data: [percent.buho, percent.frailejon, percent.oso, percent.condor],
         fill: true,
-        backgroundColor: 'rgba(109,151,250,0.12)',
-        borderColor: 'rgba(74,111,191,0.95)',
-        pointBackgroundColor: ['var(--buho)','var(--frailejon)','var(--oso)','var(--condor)'],
-        pointBorderColor: '#fff',
-        pointHoverBorderColor: '#000'
+        backgroundColor: bg,
+        borderColor: (dominantKey==='buho'? '#8aa68a' : dominantKey==='frailejon'? '#d9bf57' : dominantKey==='oso'? '#8b6a4a' : '#4a6fb1'),
+        pointBackgroundColor:['#8aa68a','#d9bf57','#8b6a4a','#4a6fb1'],
+        pointBorderColor:'#fff',
+        pointHoverBorderColor:'#000'
       }]
     },
     options: {
       scales: {
         r: {
-          beginAtZero: true,
-          suggestedMax: 100,
-          ticks: { stepSize: 20 }
+          beginAtZero:true,
+          suggestedMax:100,
+          ticks:{stepSize:20, color: '#4b5563'},
+          grid: { color: '#ecf0ef' },
+          angleLines: { color: '#ecf0ef' },
+          pointLabels: { color: '#4b5563' }
         }
       },
-      plugins: { legend: { display: false } }
+      plugins:{legend:{display:false}},
+      elements: { line: { borderWidth: 2 } }
     }
   });
 
-  // download pdf
-  document.getElementById('downloadPdfBtn').addEventListener('click', async ()=>{
-    // capture chart as image
-    const canvas = resultBlock.querySelector('#radarChart');
-    const dataUrl = canvas.toDataURL('image/png', 1.0);
+  /* ===== PDF: SINGLE LONG PAGE (opción A) =====
+     Renderizamos área de resultados a canvas y creamos un PDF con el alto exacto
+  */
+  document.getElementById('downloadPdfBtn').addEventListener('click', async ()=> {
+    const target = document.getElementById('resultGrid');
+    if(!target) return alert('No hay resultados para exportar');
+
+    // clone and prepare (ensure width consistent)
+    const clone = target.cloneNode(true);
+    const wrapper = document.createElement('div');
+    wrapper.style.width = '900px';
+    wrapper.style.padding = '24px';
+    wrapper.style.background = '#fff';
+    wrapper.style.boxSizing = 'border-box';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    // replace canvas with image in clone (chart)
+    try {
+      const origCanvas = document.querySelector('#radarChart');
+      if(origCanvas){
+        const dataUrl = origCanvas.toDataURL('image/png');
+        const clonedCanvas = clone.querySelector('canvas');
+        if(clonedCanvas && clonedCanvas.parentNode){
+          const img = document.createElement('img');
+          img.src = dataUrl;
+          img.style.width = '100%';
+          img.style.height = 'auto';
+          clonedCanvas.parentNode.replaceChild(img, clonedCanvas);
+        }
+      }
+    } catch(e){ /* ignore */ }
+
+    // render wrapper to canvas
+    const scale = 2; // improve quality
+    const canvasRender = await html2canvas(wrapper, {scale: scale, useCORS:true, backgroundColor: '#ffffff'});
+    wrapper.remove();
+
+    // create pdf with exact pixel dimensions (unit: px)
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({orientation:'portrait', unit:'pt', format:'a4'});
-    const left = 40;
-    let y = 40;
-    doc.setFontSize(18);
-    doc.text('Informe — Test de Arquetipos de Liderazgo', left, y);
-    y += 24;
-    doc.setFontSize(11);
-    doc.text(`Fecha: ${new Date().toLocaleString()}`, left, y);
-    y += 18;
-    doc.setFontSize(12);
-    doc.text('Resultados (porcentajes):', left, y);
-    y += 16;
-    doc.text(`Búho: ${percent.buho}%    Frailejón: ${percent.frailejon}%    Oso Andino: ${percent.oso}%    Cóndor: ${percent.condor}%`, left, y);
-    y += 18;
-    doc.addImage(dataUrl, 'PNG', left, y, 500, 240);
-    y += 260;
-    doc.setFontSize(13);
-    doc.text(`Arquetipo dominante: ${profiles[dominantKey].title}`, left, y);
-    y += 18;
-    doc.setFontSize(10);
-    // description
-    const lines = doc.splitTextToSize(profiles[dominantKey].desc, 500);
-    doc.text(lines, left, y);
-    y += lines.length * 12 + 8;
-    doc.setFontSize(11);
-    doc.text('Recomendaciones:', left, y);
-    y += 14;
-    profiles[dominantKey].recommendations.forEach(r=>{
-      const l = doc.splitTextToSize('- ' + r, 500);
-      doc.text(l, left, y);
-      y += l.length * 12 + 6;
-      if(y > 720){ doc.addPage(); y = 40; }
-    });
-    doc.save('informe_arquetipo.pdf');
+    const pdf = new jsPDF({orientation:'portrait', unit:'px', format:[canvasRender.width, canvasRender.height]});
+    const imgData = canvasRender.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', 0, 0, canvasRender.width, canvasRender.height);
+    const filename = `Resultados_Arquetipo_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'_')}.pdf`;
+    pdf.save(filename);
   });
 
   // restart
-  document.getElementById('restartBtn').addEventListener('click', ()=>{
-    window.location.reload();
-  });
-
-  window.scrollTo({top:0, behavior:'smooth'});
+  document.getElementById('restartBtn').addEventListener('click', ()=> location.reload());
 } // end computeResults
 
-/* --------- initial render ---------- */
+// initial render
 renderPage();
 updateProgress();
 
 </script>
 </body>
 </html>
-
